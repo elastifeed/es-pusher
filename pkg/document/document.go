@@ -20,6 +20,15 @@ type Document struct {
 	FeedUrl    string    `json:"feedUrl"`
 }
 
+// Creates JSON Representation from a Elasticsearch Document
 func (d Document) Dump() ([]byte, error) {
 	return json.Marshal(d)
+}
+
+// Loads a Document from a JSON Representation
+func Load(data []byte) (Document, error) {
+	d := Document{}
+	err := json.Unmarshal(data, &d)
+
+	return d, err
 }
