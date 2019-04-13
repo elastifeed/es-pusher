@@ -72,7 +72,7 @@ func main() {
 			defer res.Body.Close() // Be sure to close the response. defer is awesome!
 
 			if res.IsError() {
-				log.Printf("[%s] Could not index document with ID=%d", res.Status(), id)
+				log.Printf("[%s] Could not index document with ID=%s", res.Status(), id)
 			}
 		}(i, title)
 
