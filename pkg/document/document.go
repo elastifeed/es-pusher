@@ -12,7 +12,7 @@ type Dumper interface {
 
 // @TODO
 type Document struct {
-	created    time.Time `json:"created"`
+	Created    time.Time `json:"created"`
 	Caption    string    `json:"caption"`
 	Content    string    `json:"content"`
 	Url        string    `json:"url"`
