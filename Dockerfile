@@ -15,7 +15,7 @@ COPY . .
 RUN go get -d -v ./...
 
 # Build and Install executables
-RUN CGO_ENABLED=0 GOOS=linux go build -o /go/bin/es-pusher
+RUN CGO_ENABLED=0 GOOS=linux go build ./cmd/entrypoint.go && mkdir -p /go/bin/ && mv entrypoint /go/bin/es-pusher
 
 # Create smallest possible docker image for production
 FROM scratch
