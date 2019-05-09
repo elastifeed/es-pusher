@@ -15,17 +15,17 @@ type Document struct {
 	Created    time.Time `json:"created"`
 	Caption    string    `json:"caption"`
 	Content    string    `json:"content"`
-	Url        string    `json:"url"`
+	URL        string    `json:"url"`
 	IsFromFeed bool      `json:"isFromFeed"`
-	FeedUrl    string    `json:"feedUrl"`
+	FeedURL    string    `json:"feedUrl"`
 }
 
-// Creates JSON Representation from a Elasticsearch Document
+// Dump Creates JSON Representation from a Elasticsearch Document
 func (d Document) Dump() ([]byte, error) {
 	return json.Marshal(d)
 }
 
-// Loads a Document from a JSON Representation
+// Load loads a Document from a JSON Representation
 func Load(data []byte) (Document, error) {
 	d := Document{}
 	err := json.Unmarshal(data, &d)
