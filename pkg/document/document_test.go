@@ -21,7 +21,7 @@ var (
 	content    = "Contant Blaaaaablabla 1234!"
 	url        = "http=//test.super.important/gotestyourself.html"
 	isFromFeed = true
-	feedUrl    = "http://feed.wow.com/rss.xml"
+	feedURL    = "http://feed.wow.com/rss.xml"
 )
 
 // Generate Sample Document for testing
@@ -30,9 +30,9 @@ func genSampleDoc() Document {
 		Created:    created,
 		Caption:    caption,
 		Content:    content,
-		Url:        url,
+		URL:        url,
 		IsFromFeed: isFromFeed,
-		FeedUrl:    feedUrl,
+		FeedURL:    feedURL,
 	}
 }
 
@@ -50,7 +50,7 @@ func TestDocumentDump(t *testing.T) {
 		{"caption", caption},
 		{"content", content},
 		{"url", url},
-		{"feedUrl", feedUrl},
+		{"feedUrl", feedURL},
 	} {
 		if dict[pair.key] != pair.expected {
 			t.Errorf("JSON field mismatch on key '%s' - expected: '%s', found: '%s'", pair.key, pair.expected, dict[pair.key])
