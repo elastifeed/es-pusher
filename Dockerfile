@@ -15,8 +15,7 @@ COPY . .
 RUN go get -d -v ./...
 
 # Build and Install executables
-RUN go build -o /go/bin/es-pusher
-
+RUN CGO_ENABLED=0 GOOS=linux go build -o /go/bin/es-pusher
 
 # Create smallest possible docker image for production
 FROM scratch
@@ -26,6 +25,6 @@ LABEL maintainer="Matthias Riegler <me@xvzf.tech>"
 COPY --from=builder /go/bin/es-pusher /go/bin/es-pusher
 
 # Entrypoint for the elasticsearch gateway
-ENTRYPOINT ["/go/bin/app"]
+ENTRYPOINT ["/go/bin/es-pusher"]
 
 EXPOSE 8080
