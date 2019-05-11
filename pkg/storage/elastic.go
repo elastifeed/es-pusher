@@ -2,7 +2,6 @@ package storage
 
 import (
 	"context"
-	"errors"
 	"log"
 	"strings"
 	"sync"
@@ -12,22 +11,24 @@ import (
 	uuid "github.com/satori/go.uuid"
 )
 
-var (
-	once sync.Once
-	es   *elasticsearch.Client
-)
+// esdriver
+type esdriver struct {
+	es *elasticsearch.Client
+}
 
-// InitES initializes the Elasticsearch (Cluster) connection
-func InitES(cfg elasticsearch.Config) {
+// NewES establishes a new Elasticsearch connection
+func NewES(cfg elasticsearch.Config) Storage {
+	var e esdriver
+
 	var err error
-	es, err = elasticsearch.NewClient(cfg)
+	e.es, err = elasticsearch.NewClient(cfg)
 
 	if err != nil {
 		log.Fatal("Could not connect to Elasticsearch. Check connection")
 	}
 
 	// Get elasticsearch cluster info
-	res, err := es.Info()
+	res, err := e.es.Info()
 
 	if err != nil {
 		log.Fatalf("Error getting response: %s", err)
@@ -38,37 +39,43 @@ func InitES(cfg elasticsearch.Config) {
 	}
 
 	log.Printf("Connected to elasticsearch with client version %s", elasticsearch.Version)
+
+	return e
 }
 
-// AddDocument @TODO
-func AddDocument(d string) error {
-	c := make(chan error)
+// AddDocuments @TODO
+func (e esdriver) AddDocuments(index string, docs []Stringer) error {
+	var wg sync.WaitGroup
 
 	// @TODO, should not be needed atm but good for multithreading later
-	go func() {
-		req := esapi.IndexRequest{
-			Index:      "esfeed",              // Where to store it. Maybe make it dependend on the user instead of storing all data on a common index @TODO
-			DocumentID: uuid.NewV4().String(), // Not sure if a uuid is needed here/how to generate it on the storage side.
-			Body:       strings.NewReader(d),  // JSON Body
-			Refresh:    "true",                // Refresh the index, maybe call this periodically instead
-		}
+	for _, d := range docs {
+		go func(toAdd string) {
+			wg.Add(1)
+			defer wg.Done()
 
-		// Insert into elasticsearch
-		res, err := req.Do(context.Background(), es)
+			req := esapi.IndexRequest{
+				Index:      index,                    // Where to store it. Maybe make it dependend on the user instead of storing all data on a common index @TODO
+				DocumentID: uuid.NewV4().String(),    // Not sure if a uuid is needed here/how to generate it on the storage side.
+				Body:       strings.NewReader(toAdd), // JSON Body
+				Refresh:    "true",                   // Refresh the index, maybe call this periodically instead
+			}
 
-		if err != nil {
-			c <- err
-			return
-		}
+			// Insert into elasticsearch
+			res, err := req.Do(context.Background(), e.es)
 
-		if res.IsError() {
-			c <- errors.New(res.String())
-			return
-		}
+			if err != nil {
+				return
+			}
 
-		log.Print("Inserted document into elasticsearch")
-		c <- nil
-	}()
+			if res.IsError() {
+				return
+			}
 
-	return <-c
+			log.Print("Inserted document into elasticsearch")
+		}(d.String())
+	}
+
+	wg.Wait()
+
+	return nil
 }
