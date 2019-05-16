@@ -6,11 +6,13 @@ import (
 	"encoding/json"
 )
 
+// Dumper interfaces specifies the dump function which converts the parsed struct
+// into json again
 type Dumper interface {
 	Dump() string
 }
 
-// @TODO
+// Document contains the schema of a data entry which is stored in Elasticsearch
 type Document struct {
 	Created    time.Time `json:"created"`
 	Caption    string    `json:"caption"`

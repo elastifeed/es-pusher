@@ -8,6 +8,7 @@ import (
 
 	"github.com/elastic/go-elasticsearch/v7"
 	"github.com/elastic/go-elasticsearch/v7/esapi"
+	"github.com/elastifeed/es-pusher/pkg/document"
 	uuid "github.com/satori/go.uuid"
 )
 
@@ -44,11 +45,12 @@ func NewES(cfg elasticsearch.Config) Storage {
 }
 
 // AddDocuments @TODO
-func (e esdriver) AddDocuments(index string, docs []Stringer) error {
+func (e esdriver) AddDocuments(index string, docs []document.Document) error {
 	var wg sync.WaitGroup
 
 	// @TODO, should not be needed atm but good for multithreading later
 	for _, d := range docs {
+		dString, _ := d.Dump()
 		go func(toAdd string) {
 			wg.Add(1)
 			defer wg.Done()
@@ -72,7 +74,7 @@ func (e esdriver) AddDocuments(index string, docs []Stringer) error {
 			}
 
 			log.Print("Inserted document into elasticsearch")
-		}(d.String())
+		}(string(dString))
 	}
 
 	wg.Wait()

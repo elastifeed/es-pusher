@@ -1,5 +1,7 @@
 package storage
 
+import "github.com/elastifeed/es-pusher/pkg/document"
+
 // Stringer interface for documents
 type Stringer interface {
 	String() string
@@ -7,5 +9,5 @@ type Stringer interface {
 
 // Storage interface
 type Storage interface {
-	AddDocuments(index string, docs []Stringer) error
+	AddDocuments(index string, docs []document.Document) error
 }
