@@ -33,7 +33,10 @@ func (rs rests) AddDocuments(w http.ResponseWriter, r *http.Request) {
 	if decoder.Decode(&docs) != nil {
 		log.Printf("Error decoding Document from JSON Body")
 		w.WriteHeader(http.StatusBadRequest)
-		w.Write([]byte("{\"status\": \"bad request\"}"))
+		_, err := w.Write([]byte("{\"status\": \"bad request\"}"))
+		if err != nil {
+			log.Print("Response not fully transmitted")
+		}
 		return
 	}
 
@@ -41,9 +44,15 @@ func (rs rests) AddDocuments(w http.ResponseWriter, r *http.Request) {
 
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
-		w.Write([]byte("{\"status\": \"internal error\"}"))
+		_, err := w.Write([]byte("{\"status\": \"internal error\"}"))
+		if err != nil {
+			log.Print("Response not fully transmitted")
+		}
 		return
 	}
 
-	w.Write([]byte("{\"status\": \"ok\"}"))
+	_, err = w.Write([]byte("{\"status\": \"ok\"}"))
+	if err != nil {
+		log.Print("Response not fully transmitted")
+	}
 }
