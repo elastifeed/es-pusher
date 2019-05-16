@@ -58,8 +58,8 @@ func (e esdriver) AddDocuments(index string, docs []document.Document) error {
 	// @TODO, should not be needed atm but good for multithreading later
 	for _, d := range docs {
 		dString, _ := d.Dump()
+		wg.Add(1)
 		go func(toAdd string) {
-			wg.Add(1)
 			defer wg.Done()
 
 			req := esapi.IndexRequest{
