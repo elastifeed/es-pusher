@@ -2,6 +2,7 @@ package storage
 
 import (
 	"context"
+	"encoding/json"
 	"log"
 	"strings"
 	"sync"
@@ -20,8 +21,9 @@ type esdriver struct {
 // NewES establishes a new Elasticsearch connection
 func NewES(cfg elasticsearch.Config) Storage {
 	var e esdriver
-
 	var err error
+	var r map[string]interface{}
+
 	e.es, err = elasticsearch.NewClient(cfg)
 
 	if err != nil {
@@ -39,7 +41,12 @@ func NewES(cfg elasticsearch.Config) Storage {
 		log.Fatalf("Elasticsearch failure: %s", err)
 	}
 
-	log.Printf("Connected to elasticsearch with client version %s", elasticsearch.Version)
+	// Deserialize the response into a map.
+	if err := json.NewDecoder(res.Body).Decode(&r); err != nil {
+		log.Fatalf("Error parsing the elasticsearch response body: %s", err)
+	}
+
+	log.Printf("Connected to elasticsearch %s", r["version"].(map[string]interface{})["number"])
 
 	return e
 }
