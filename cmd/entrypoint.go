@@ -11,20 +11,18 @@ import (
 
 func main() {
 
+	// Connect to a specified Elasticsearch instance
 	s := storage.NewES(elasticsearch.Config{
 		Addresses: []string{
 			"http://127.0.0.1:9200",
 		},
 	})
 
-	if s == nil {
-		return
-	}
+	// Create new Rest Api Endpoint based on the previously connected elasticsearch storage engine
+	rAPI := api.New(s)
+	// Add HTTP Endpoint to /add
+	http.HandleFunc("/add", rAPI.AddDocuments)
 
-	r := api.New(s)
-
-	http.HandleFunc("/add", r.AddDocuments)
-
+	// Run forever and exit on error
 	log.Fatal(http.ListenAndServe(":8080", nil))
-
 }

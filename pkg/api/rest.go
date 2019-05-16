@@ -9,21 +9,22 @@ import (
 	"github.com/elastifeed/es-pusher/pkg/storage"
 )
 
-// Rest @TODO
-type Rest interface {
+// Restr is the REST API Interface which provides all endpoints
+type Restr interface {
 	AddDocuments(w http.ResponseWriter, r *http.Request)
 }
 
+// rests is the internal storage struct for the REST API. It contains the storage engine
 type rests struct {
-	storage storage.Storage
+	storage storage.Storager
 }
 
-// New @TODO
-func New(s storage.Storage) Rest {
+// New Creates a new REST API endpoint
+func New(s storage.Storager) Restr {
 	return rests{storage: s}
 }
 
-// AddDocuments @TODO
+// AddDocuments adds 1..n documents to the elasticsearch database
 func (rs rests) AddDocuments(w http.ResponseWriter, r *http.Request) {
 	var docs []document.Document
 

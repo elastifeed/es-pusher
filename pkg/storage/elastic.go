@@ -19,7 +19,7 @@ type esdriver struct {
 }
 
 // NewES establishes a new Elasticsearch connection
-func NewES(cfg elasticsearch.Config) Storage {
+func NewES(cfg elasticsearch.Config) Storager {
 	var e esdriver
 	var err error
 	var r map[string]interface{}
@@ -51,11 +51,11 @@ func NewES(cfg elasticsearch.Config) Storage {
 	return e
 }
 
-// AddDocuments @TODO
+// AddDocuments adds 1..n documents to elasticsearch.
 func (e esdriver) AddDocuments(index string, docs []document.Document) error {
 	var wg sync.WaitGroup
 
-	// @TODO, should not be needed atm but good for multithreading later
+	// Add all documents
 	for _, d := range docs {
 		dString, _ := d.Dump()
 		wg.Add(1)
