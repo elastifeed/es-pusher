@@ -12,4 +12,4 @@ Provides a REST API and interfaces with Elasticsearch.
 
 
 ## Running locally for debugging
-`podman --network=host -e ES_ADDRESSES='["http://localhost:9200"]' -e API_BIND=':9000' -d elastifeed/es-pusher:latest`
+`podman run --network=host -e ES_ADDRESSES='["http://localhost:9200"]' -e API_BIND=':9000' -d elastifeed/es-pusher:latest`
