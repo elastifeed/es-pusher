@@ -22,11 +22,11 @@ type esdriver struct {
 
 var (
 	addDocumentRequestedCount = promauto.NewCounter(prometheus.CounterOpts{
-		Name: "espusher_storage_elasticsearch_added_document_count",
+		Name: "espusher_storage_elasticsearch_added_document_total",
 		Help: "Number of Documents added to elasticsearch",
 	})
 	addedDocumentCount = promauto.NewCounter(prometheus.CounterOpts{
-		Name: "espusher_storage_elasticsearch_add_document_requested_count",
+		Name: "espusher_storage_elasticsearch_add_document_requested_total",
 		Help: "Number of Documents added to elasticsearch",
 	})
 )

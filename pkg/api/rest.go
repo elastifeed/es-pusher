@@ -23,7 +23,7 @@ type rests struct {
 
 var (
 	restCallsCount = promauto.NewCounter(prometheus.CounterOpts{
-		Name: "espusher_rest_calls",
+		Name: "espusher_rest_total",
 		Help: "Number of REST-API calls",
 	})
 	restCallsMalformed = promauto.NewCounter(prometheus.CounterOpts{
