@@ -13,3 +13,12 @@ Provides a REST API and interfaces with Elasticsearch.
 
 ## Running locally for debugging
 `podman run --network=host -e ES_ADDRESSES='["http://localhost:9200"]' -e API_BIND=':9000' -d elastifeed/es-pusher:latest`
+
+## Prometheus metrics
+>  Metrics can be optained via `<ip:port>/metrics`
+Available metrics:
+- espusher_rest_calls
+- espusher_rest_calls_malformed
+- espusher_rest_calls_successful
+- espusher_storage_elasticsearch_add_document_requested_count
+- espusher_storage_elasticsearch_added_document_count
