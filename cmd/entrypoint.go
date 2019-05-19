@@ -10,6 +10,7 @@ import (
 	"github.com/elastifeed/es-pusher/pkg/api"
 	"github.com/elastifeed/es-pusher/pkg/storage"
 	"github.com/golang/glog"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
 
 // main entry point for es-pusher
@@ -37,8 +38,11 @@ func main() {
 
 	// Create new Rest Api Endpoint based on the previously connected elasticsearch storage engine
 	rAPI := api.New(s)
-	// Add HTTP Endpoint to /add
+	// Add API Endpoint to /add
 	http.HandleFunc("/add", rAPI.AddDocuments)
+
+	// Add Monitoring endpoint
+	http.Handle("/metrics", promhttp.Handler())
 
 	// Run forever and exit on error
 	glog.Fatal(http.ListenAndServe(os.Getenv("API_BIND"), nil))
