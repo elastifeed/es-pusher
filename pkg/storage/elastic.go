@@ -3,13 +3,13 @@ package storage
 import (
 	"context"
 	"encoding/json"
-	"log"
 	"strings"
 	"sync"
 
 	"github.com/elastic/go-elasticsearch/v7"
 	"github.com/elastic/go-elasticsearch/v7/esapi"
 	"github.com/elastifeed/es-pusher/pkg/document"
+	"github.com/golang/glog"
 	uuid "github.com/satori/go.uuid"
 )
 
@@ -19,7 +19,7 @@ type esdriver struct {
 }
 
 // NewES establishes a new Elasticsearch connection
-func NewES(cfg elasticsearch.Config) Storager {
+func NewES(cfg elasticsearch.Config) (Storager, error) {
 	var e esdriver
 	var err error
 	var r map[string]interface{}
@@ -27,28 +27,31 @@ func NewES(cfg elasticsearch.Config) Storager {
 	e.es, err = elasticsearch.NewClient(cfg)
 
 	if err != nil {
-		log.Fatal("Could not connect to Elasticsearch. Check connection")
+		glog.Fatal("Could not connect to Elasticsearch. Check connection")
 	}
 
 	// Get elasticsearch cluster info
 	res, err := e.es.Info()
 
 	if err != nil {
-		log.Fatalf("Error getting response: %s", err)
+		glog.Errorf("Error getting response: %s", err)
+		return nil, err
 	}
 
 	if res.IsError() {
-		log.Fatalf("Elasticsearch failure: %s", err)
+		glog.Errorf("Elasticsearch failure: %s", err)
+		return nil, err
 	}
 
 	// Deserialize the response into a map.
 	if err := json.NewDecoder(res.Body).Decode(&r); err != nil {
-		log.Fatalf("Error parsing the elasticsearch response body: %s", err)
+		glog.Errorf("Error parsing the elasticsearch response body: %s", err)
+		return nil, err
 	}
 
-	log.Printf("Connected to elasticsearch %s", r["version"].(map[string]interface{})["number"])
+	glog.Infof("Connected to elasticsearch %s", r["version"].(map[string]interface{})["number"])
 
-	return e
+	return e, nil
 }
 
 // AddDocuments adds 1..n documents to elasticsearch.
@@ -79,12 +82,11 @@ func (e esdriver) AddDocuments(index string, docs []document.Document) error {
 			if res.IsError() {
 				return
 			}
-
-			log.Print("Inserted document into elasticsearch")
 		}(string(dString))
 	}
 
 	wg.Wait()
 
+	glog.Infof("Inserted %d documents into elasticsearch into \"%s\"", len(docs), index)
 	return nil
 }
