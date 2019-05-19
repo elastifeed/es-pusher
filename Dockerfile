@@ -24,7 +24,10 @@ LABEL maintainer="Matthias Riegler <me@xvzf.tech>"
 
 COPY --from=builder /go/bin/es-pusher /go/bin/es-pusher
 
-# Entrypoint for the elasticsearch gateway
-ENTRYPOINT ["/go/bin/es-pusher"]
+# Fixed port
+ENV API_BIND=":9090"
 
-EXPOSE 8080
+# Entrypoint for the elasticsearch gateway
+ENTRYPOINT ["/go/bin/es-pusher", "-logtostderr=true"]
+
+EXPOSE 9090
