@@ -24,8 +24,6 @@ func main() {
 		log.Fatal("Configuration error, check ES_ADDRESSES")
 	}
 
-	log.Println(addrs)
-
 	// Connect to a specified Elasticsearch instance
 	s := storage.NewES(elasticsearch.Config{
 		Addresses: addrs,
