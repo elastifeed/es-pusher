@@ -2,13 +2,14 @@ package main
 
 import (
 	"encoding/json"
-	"log"
+	"flag"
 	"net/http"
 	"os"
 
 	"github.com/elastic/go-elasticsearch/v7"
 	"github.com/elastifeed/es-pusher/pkg/api"
 	"github.com/elastifeed/es-pusher/pkg/storage"
+	"github.com/golang/glog"
 )
 
 // main entry point for es-pusher
@@ -17,17 +18,22 @@ import (
 //    - ES_ADDRESSES (e.g. ["http://host0:9200", "http://host1:9200", ...])
 //    - API_BIND (e.g. ":9000")
 func main() {
+	flag.Parse()
 
 	var addrs []string
 
 	if json.Unmarshal([]byte(os.Getenv("ES_ADDRESSES")), &addrs) != nil {
-		log.Fatal("Configuration error, check ES_ADDRESSES")
+		glog.Fatal("Configuration error, check ES_ADDRESSES")
 	}
 
 	// Connect to a specified Elasticsearch instance
-	s := storage.NewES(elasticsearch.Config{
+	s, err := storage.NewES(elasticsearch.Config{
 		Addresses: addrs,
 	})
+
+	if err != nil {
+		glog.Fatal("Elasticsearch Initialization failed", err)
+	}
 
 	// Create new Rest Api Endpoint based on the previously connected elasticsearch storage engine
 	rAPI := api.New(s)
@@ -35,5 +41,5 @@ func main() {
 	http.HandleFunc("/add", rAPI.AddDocuments)
 
 	// Run forever and exit on error
-	log.Fatal(http.ListenAndServe(os.Getenv("API_BIND"), nil))
+	glog.Fatal(http.ListenAndServe(os.Getenv("API_BIND"), nil))
 }
