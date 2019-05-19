@@ -7,6 +7,8 @@ import (
 	"github.com/elastifeed/es-pusher/pkg/document"
 	"github.com/elastifeed/es-pusher/pkg/storage"
 	"github.com/golang/glog"
+	"github.com/prometheus/client_golang/prometheus"
+	"github.com/prometheus/client_golang/prometheus/promauto"
 )
 
 // Restr is the REST API Interface which provides all endpoints
@@ -19,6 +21,21 @@ type rests struct {
 	storage storage.Storager
 }
 
+var (
+	restCallsCount = promauto.NewCounter(prometheus.CounterOpts{
+		Name: "espusher_rest_calls",
+		Help: "Number of REST-API calls",
+	})
+	restCallsMalformed = promauto.NewCounter(prometheus.CounterOpts{
+		Name: "espusher_rest_calls_malformed",
+		Help: "Number of malformed (json) REST-API calls",
+	})
+	restCallsSuccessful = promauto.NewCounter(prometheus.CounterOpts{
+		Name: "espusher_rest_calls_successful",
+		Help: "Number of successful REST-API calls",
+	})
+)
+
 // New Creates a new REST API endpoint
 func New(s storage.Storager) Restr {
 	return rests{storage: s}
@@ -26,6 +43,8 @@ func New(s storage.Storager) Restr {
 
 // AddDocuments adds 1..n documents to the elasticsearch database
 func (rs rests) AddDocuments(w http.ResponseWriter, r *http.Request) {
+	restCallsCount.Inc()
+
 	var req struct {
 		Index string              `json:"index"`
 		Docs  []document.Document `json:"docs"`
@@ -35,6 +54,7 @@ func (rs rests) AddDocuments(w http.ResponseWriter, r *http.Request) {
 	decoder.DisallowUnknownFields() // Has to match
 
 	if decoder.Decode(&req) != nil {
+		restCallsMalformed.Inc()
 		glog.Error("Error decoding Document from JSON Body")
 		w.WriteHeader(http.StatusBadRequest)
 		_, err := w.Write([]byte("{\"status\": \"bad request\"}"))
@@ -59,4 +79,6 @@ func (rs rests) AddDocuments(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		glog.Error("Response not fully transmitted")
 	}
+
+	restCallsSuccessful.Inc()
 }

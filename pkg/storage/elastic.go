@@ -10,6 +10,8 @@ import (
 	"github.com/elastic/go-elasticsearch/v7/esapi"
 	"github.com/elastifeed/es-pusher/pkg/document"
 	"github.com/golang/glog"
+	"github.com/prometheus/client_golang/prometheus"
+	"github.com/prometheus/client_golang/prometheus/promauto"
 	uuid "github.com/satori/go.uuid"
 )
 
@@ -17,6 +19,17 @@ import (
 type esdriver struct {
 	es *elasticsearch.Client
 }
+
+var (
+	addDocumentRequestedCount = promauto.NewCounter(prometheus.CounterOpts{
+		Name: "espusher_storage_elasticsearch_added_document_count",
+		Help: "Number of Documents added to elasticsearch",
+	})
+	addedDocumentCount = promauto.NewCounter(prometheus.CounterOpts{
+		Name: "espusher_storage_elasticsearch_add_document_requested_count",
+		Help: "Number of Documents added to elasticsearch",
+	})
+)
 
 // NewES establishes a new Elasticsearch connection
 func NewES(cfg elasticsearch.Config) (Storager, error) {
@@ -58,6 +71,9 @@ func NewES(cfg elasticsearch.Config) (Storager, error) {
 func (e esdriver) AddDocuments(index string, docs []document.Document) error {
 	var wg sync.WaitGroup
 
+	// Update counter
+	addDocumentRequestedCount.Add(float64(len(docs)))
+
 	// Add all documents
 	for _, d := range docs {
 		dString, _ := d.Dump()
@@ -82,6 +98,8 @@ func (e esdriver) AddDocuments(index string, docs []document.Document) error {
 			if res.IsError() {
 				return
 			}
+
+			addedDocumentCount.Inc()
 		}(string(dString))
 	}
 
