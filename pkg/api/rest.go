@@ -45,6 +45,9 @@ func New(s storage.Storager) Restr {
 func (rs rests) AddDocuments(w http.ResponseWriter, r *http.Request) {
 	restCallsCount.Inc()
 
+	// Always JSON response here
+	w.Header().Set("Content-Type", "application/json")
+
 	var req struct {
 		Index string              `json:"index"`
 		Docs  []document.Document `json:"docs"`
