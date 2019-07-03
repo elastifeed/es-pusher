@@ -49,8 +49,8 @@ func (rs rests) AddDocuments(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
 	var req struct {
-		Index string              `json:"index"`
-		Docs  []document.Document `json:"docs"`
+		Indexes []string            `json:"indexes"`
+		Docs    []document.Document `json:"docs"`
 	}
 
 	decoder := json.NewDecoder(r.Body)
@@ -67,7 +67,7 @@ func (rs rests) AddDocuments(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err := rs.storage.AddDocuments(req.Index, req.Docs)
+	err := rs.storage.AddDocuments(req.Indexes, req.Docs)
 
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)

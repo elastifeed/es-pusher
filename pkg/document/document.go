@@ -20,6 +20,8 @@ type Document struct {
 	URL        string    `json:"url"`
 	IsFromFeed bool      `json:"isFromFeed"`
 	FeedURL    string    `json:"feedUrl"`
+	Starred    bool      `json:"starred"`
+	ReadLater  bool      `json:"read_later"`
 }
 
 // Dump Creates JSON Representation from a Elasticsearch Document

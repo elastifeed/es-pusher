@@ -2,7 +2,10 @@ package storage
 
 import (
 	"context"
+	"crypto/sha256"
+	"encoding/hex"
 	"encoding/json"
+	"io"
 	"strings"
 	"sync"
 
@@ -11,7 +14,6 @@ import (
 	"github.com/elastifeed/es-pusher/pkg/document"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promauto"
-	uuid "github.com/satori/go.uuid"
 	"k8s.io/klog"
 )
 
@@ -68,7 +70,7 @@ func NewES(cfg elasticsearch.Config) (Storager, error) {
 }
 
 // AddDocuments adds 1..n documents to elasticsearch.
-func (e esdriver) AddDocuments(index string, docs []document.Document) error {
+func (e esdriver) AddDocuments(indexes []string, docs []document.Document) error {
 	var wg sync.WaitGroup
 
 	// Update counter
@@ -76,35 +78,42 @@ func (e esdriver) AddDocuments(index string, docs []document.Document) error {
 
 	// Add all documents
 	for _, d := range docs {
-		dString, _ := d.Dump()
+
 		wg.Add(1)
-		go func(toAdd string) {
+		go func(d document.Document) {
+			// Generate hashed document index to avoid duplicates
+			idHasher := sha256.New()
+			io.WriteString(idHasher, d.URL+d.Caption+d.Content)
+			dString, _ := d.Dump()
 			defer wg.Done()
 
-			req := esapi.IndexRequest{
-				Index:      index,                    // Where to store it. Maybe make it dependend on the user instead of storing all data on a common index @TODO
-				DocumentID: uuid.NewV4().String(),    // Not sure if a uuid is needed here/how to generate it on the storage side.
-				Body:       strings.NewReader(toAdd), // JSON Body
-				Refresh:    "true",                   // Refresh the index, maybe call this periodically instead
+			for _, index := range indexes {
+				wg.Add(1)
+				go func(index string) {
+					defer wg.Done()
+					req := esapi.IndexRequest{
+						Index:      index,
+						DocumentID: hex.EncodeToString(idHasher.Sum(nil)),
+						Body:       strings.NewReader(string(dString)),
+						Refresh:    "true",
+					}
+
+					// Insert into elasticsearch
+					res, err := req.Do(context.Background(), e.es)
+
+					if err != nil || res.IsError() {
+						return
+					}
+
+					addedDocumentCount.Inc()
+				}(index)
 			}
 
-			// Insert into elasticsearch
-			res, err := req.Do(context.Background(), e.es)
-
-			if err != nil {
-				return
-			}
-
-			if res.IsError() {
-				return
-			}
-
-			addedDocumentCount.Inc()
-		}(string(dString))
+		}(d)
 	}
 
 	wg.Wait()
 
-	klog.Infof("Inserted %d documents into elasticsearch into \"%s\"", len(docs), index)
+	klog.Infof("Inserted %d documents into elasticsearch into \"%s\"", len(docs), indexes)
 	return nil
 }
