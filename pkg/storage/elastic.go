@@ -9,10 +9,10 @@ import (
 	"github.com/elastic/go-elasticsearch/v7"
 	"github.com/elastic/go-elasticsearch/v7/esapi"
 	"github.com/elastifeed/es-pusher/pkg/document"
-	"github.com/golang/glog"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promauto"
 	uuid "github.com/satori/go.uuid"
+	"k8s.io/klog"
 )
 
 // esdriver
@@ -40,29 +40,29 @@ func NewES(cfg elasticsearch.Config) (Storager, error) {
 	e.es, err = elasticsearch.NewClient(cfg)
 
 	if err != nil {
-		glog.Fatal("Could not connect to Elasticsearch. Check connection")
+		klog.Fatal("Could not connect to Elasticsearch. Check connection")
 	}
 
 	// Get elasticsearch cluster info
 	res, err := e.es.Info()
 
 	if err != nil {
-		glog.Errorf("Error getting response: %s", err)
+		klog.Errorf("Error getting response: %s", err)
 		return nil, err
 	}
 
 	if res.IsError() {
-		glog.Errorf("Elasticsearch failure: %s", err)
+		klog.Errorf("Elasticsearch failure: %s", err)
 		return nil, err
 	}
 
 	// Deserialize the response into a map.
 	if err := json.NewDecoder(res.Body).Decode(&r); err != nil {
-		glog.Errorf("Error parsing the elasticsearch response body: %s", err)
+		klog.Errorf("Error parsing the elasticsearch response body: %s", err)
 		return nil, err
 	}
 
-	glog.Infof("Connected to elasticsearch %s", r["version"].(map[string]interface{})["number"])
+	klog.Infof("Connected to elasticsearch %s", r["version"].(map[string]interface{})["number"])
 
 	return e, nil
 }
@@ -105,6 +105,6 @@ func (e esdriver) AddDocuments(index string, docs []document.Document) error {
 
 	wg.Wait()
 
-	glog.Infof("Inserted %d documents into elasticsearch into \"%s\"", len(docs), index)
+	klog.Infof("Inserted %d documents into elasticsearch into \"%s\"", len(docs), index)
 	return nil
 }

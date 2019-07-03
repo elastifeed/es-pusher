@@ -2,15 +2,14 @@ package main
 
 import (
 	"encoding/json"
-	"flag"
 	"net/http"
 	"os"
 
 	"github.com/elastic/go-elasticsearch/v7"
 	"github.com/elastifeed/es-pusher/pkg/api"
 	"github.com/elastifeed/es-pusher/pkg/storage"
-	"github.com/golang/glog"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
+	"k8s.io/klog"
 )
 
 // main entry point for es-pusher
@@ -19,12 +18,12 @@ import (
 //    - ES_ADDRESSES (e.g. ["http://host0:9200", "http://host1:9200", ...])
 //    - API_BIND (e.g. ":9000")
 func main() {
-	flag.Parse()
+	klog.InitFlags(nil)
 
 	var addrs []string
 
 	if json.Unmarshal([]byte(os.Getenv("ES_ADDRESSES")), &addrs) != nil {
-		glog.Fatal("Configuration error, check ES_ADDRESSES")
+		klog.Fatal("Configuration error, check ES_ADDRESSES")
 	}
 
 	// Connect to a specified Elasticsearch instance
@@ -33,7 +32,7 @@ func main() {
 	})
 
 	if err != nil {
-		glog.Fatal("Elasticsearch Initialization failed", err)
+		klog.Fatal("Elasticsearch Initialization failed", err)
 	}
 
 	// Create new Rest Api Endpoint based on the previously connected elasticsearch storage engine
@@ -45,5 +44,5 @@ func main() {
 	http.Handle("/metrics", promhttp.Handler())
 
 	// Run forever and exit on error
-	glog.Fatal(http.ListenAndServe(os.Getenv("API_BIND"), nil))
+	klog.Fatal(http.ListenAndServe(os.Getenv("API_BIND"), nil))
 }

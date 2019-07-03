@@ -6,9 +6,9 @@ import (
 
 	"github.com/elastifeed/es-pusher/pkg/document"
 	"github.com/elastifeed/es-pusher/pkg/storage"
-	"github.com/golang/glog"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promauto"
+	"k8s.io/klog"
 )
 
 // Restr is the REST API Interface which provides all endpoints
@@ -58,11 +58,11 @@ func (rs rests) AddDocuments(w http.ResponseWriter, r *http.Request) {
 
 	if decoder.Decode(&req) != nil {
 		restCallsMalformed.Inc()
-		glog.Error("Error decoding Document from JSON Body")
+		klog.Error("Error decoding Document from JSON Body")
 		w.WriteHeader(http.StatusBadRequest)
 		_, err := w.Write([]byte("{\"status\": \"bad request\"}"))
 		if err != nil {
-			glog.Error("Response not fully transmitted")
+			klog.Error("Response not fully transmitted")
 		}
 		return
 	}
@@ -73,14 +73,14 @@ func (rs rests) AddDocuments(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 		_, err := w.Write([]byte("{\"status\": \"internal error\"}"))
 		if err != nil {
-			glog.Error("Response not fully transmitted")
+			klog.Error("Response not fully transmitted")
 		}
 		return
 	}
 
 	_, err = w.Write([]byte("{\"status\": \"ok\"}"))
 	if err != nil {
-		glog.Error("Response not fully transmitted")
+		klog.Error("Response not fully transmitted")
 	}
 
 	restCallsSuccessful.Inc()
