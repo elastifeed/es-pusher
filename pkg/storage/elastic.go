@@ -83,7 +83,7 @@ func (e esdriver) AddDocuments(indexes []string, docs []document.Document) error
 		go func(d document.Document) {
 			// Generate hashed document index to avoid duplicates
 			idHasher := sha256.New()
-			io.WriteString(idHasher, d.URL+d.Caption+d.Content)
+			io.WriteString(idHasher, d.URL+d.Title+d.RawContent)
 			dString, _ := d.Dump()
 			defer wg.Done()
 

@@ -6,22 +6,21 @@ import (
 	"encoding/json"
 )
 
-// Dumper interfaces specifies the dump function which converts the parsed struct
-// into json again
-type Dumper interface {
-	Dump() string
-}
-
 // Document contains the schema of a data entry which is stored in Elasticsearch
 type Document struct {
-	Created    time.Time `json:"created"`
-	Caption    string    `json:"caption"`
-	Content    string    `json:"content"`
-	URL        string    `json:"url"`
-	IsFromFeed bool      `json:"isFromFeed"`
-	FeedURL    string    `json:"feedUrl"`
-	Starred    bool      `json:"starred"`
-	ReadLater  bool      `json:"read_later"`
+	Created         time.Time `json:"created"`
+	Author          string    `json:"author"`
+	Title           string    `json:"title"`
+	RawContent      string    `json:"raw_content"`
+	MarkdownContent string    `json:"markdown_content"`
+	PdfURL          string    `json:"pdf"`
+	ScreenshotURL   string    `json:"screenshot"`
+	ThumbnailURL    string    `json:"thumbnail"`
+	URL             string    `json:"url"`
+	IsFromFeed      bool      `json:"from_feed"`
+	FeedURL         string    `json:"feed_url"`
+	Starred         bool      `json:"starred"`
+	ReadLater       bool      `json:"read_later"`
 }
 
 // Dump Creates JSON Representation from a Elasticsearch Document
