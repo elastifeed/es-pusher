@@ -1,6 +1,6 @@
 package storage
 
-import "github.com/elastifeed/es-pusher/pkg/document"
+import "github.com/elastifeed/es-pusher/internal/document"
 
 // Storager is contains all functions provided by the storage driver engine
 type Storager interface {

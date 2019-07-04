@@ -6,8 +6,8 @@ import (
 	"os"
 
 	"github.com/elastic/go-elasticsearch/v7"
-	"github.com/elastifeed/es-pusher/pkg/api"
-	"github.com/elastifeed/es-pusher/pkg/storage"
+	"github.com/elastifeed/es-pusher/internal/api"
+	"github.com/elastifeed/es-pusher/internal/storage"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"k8s.io/klog"
 )
