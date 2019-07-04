@@ -50,7 +50,7 @@ func TestDocumentDump(t *testing.T) {
 		{"title", title},
 		{"raw_content", rawContent},
 		{"url", url},
-		{"feedUrl", feedURL},
+		{"feed_url", feedURL},
 	} {
 		if dict[pair.key] != pair.expected {
 			t.Errorf("JSON field mismatch on key '%s' - expected: '%s', found: '%s'", pair.key, pair.expected, dict[pair.key])
