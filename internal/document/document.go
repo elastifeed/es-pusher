@@ -17,6 +17,7 @@ type Document struct {
 	ScreenshotURL   string    `json:"screenshot"`
 	ThumbnailURL    string    `json:"thumbnail"`
 	URL             string    `json:"url"`
+	Categories      []string  `json:"categories"`
 	IsFromFeed      bool      `json:"from_feed"`
 	FeedURL         string    `json:"feed_url"`
 	Starred         bool      `json:"starred"`
