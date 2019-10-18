@@ -2,6 +2,7 @@ package document
 
 import (
 	"fmt"
+	"reflect"
 	"testing"
 	"time"
 
@@ -66,7 +67,7 @@ func TestDocumentLoad(t *testing.T) {
 	fmt.Println(orig)
 	fmt.Println(loaded)
 
-	if orig != loaded {
+	if !reflect.DeepEqual(orig, loaded) {
 		t.Error("Mismatch when loading a dumped Document")
 	}
 }
